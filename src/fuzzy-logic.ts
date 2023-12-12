@@ -55,7 +55,11 @@ function defuzzify(output: {
   const averageVertices = [10, 15, 20] as const;
   const generousVertices = [20, 25, 30] as const;
 
-  const xRange = Array.from({ length: 1000 }, (_, i) => (i * 30) / 999);
+  const numberOfSamples = 1000;
+  const xRange = Array.from(
+    { length: numberOfSamples },
+    (_, i) => (i * 1000) / numberOfSamples
+  );
 
   const triangularMembership = (
     x: number,
@@ -67,19 +71,22 @@ function defuzzify(output: {
   };
 
   let combinedMembership = xRange.map((x) => {
-    const cheapMembership =
-      triangularMembership(x, ...cheapVertices) * output.cheap;
-    const averageMembership =
-      triangularMembership(x, ...averageVertices) * output.average;
-    const generousMembership =
-      triangularMembership(x, ...generousVertices) * output.generous;
-    return Math.max(cheapMembership, averageMembership, generousMembership);
+    const cheapMembership = triangularMembership(x, ...cheapVertices);
+    const averageMembership = triangularMembership(x, ...averageVertices);
+    const generousMembership = triangularMembership(x, ...generousVertices);
+
+    const clippedCheap = Math.min(cheapMembership, output.cheap);
+    const clippedAverage = Math.min(averageMembership, output.average);
+    const clippedGenerous = Math.min(generousMembership, output.generous);
+
+    return Math.max(clippedCheap, clippedAverage, clippedGenerous);
   });
 
   const numerator = combinedMembership.reduce(
-    (acc, membership, index) => acc + membership * xRange[index],
+    (acc, membership, index) => (acc += membership * xRange[index]),
     0
   );
+
   const denominator = combinedMembership.reduce(
     (acc, membership) => acc + membership,
     0
