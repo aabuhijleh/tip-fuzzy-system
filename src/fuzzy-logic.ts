@@ -58,7 +58,7 @@ function defuzzify(output: {
   const numberOfSamples = 1000;
   const xRange = Array.from(
     { length: numberOfSamples },
-    (_, i) => (i * 1000) / numberOfSamples
+    (_, i) => (i * 30) / numberOfSamples
   );
 
   const triangularMembership = (
